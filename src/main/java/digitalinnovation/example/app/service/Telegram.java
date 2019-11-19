@@ -6,7 +6,6 @@ import digitalinnovation.example.app.client.RestTemplateClient;
 import digitalinnovation.example.app.dto.MessageSend;
 import digitalinnovation.example.app.dto.ResultBotTelegram;
 import digitalinnovation.example.app.dto.ResultBotTelegramList;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,14 +21,25 @@ public class Telegram {
     }
 
     public void enviarMensagem(MessageSend mensagem) {
+        //HTTP CLIENT
+        ResultBotTelegram resultBotTelegramResponseEntity = javaHttpClient.enviarMensagem(mensagem);
+
+        //RestTemplate
+        restTemplateClient.enviarMensagem(mensagem);
+
         //FeingClient
-        ResultBotTelegram resultBotTelegramResponseEntity = feingClient.enviarMensagem1(mensagem);
         ResultBotTelegram resultBotTelegram = feingClient.enviarMensagem1(mensagem);
     }
 
     public ResultBotTelegramList buscarAtualizacao() {
+        //HTTP CLIENT
+        ResultBotTelegramList resultBotTelegramList = javaHttpClient.buscarAtualizacao();
+
+        //RestTemplate
+        ResultBotTelegramList resultBotTelegramList1 = restTemplateClient.buscarAtualizacao();
+
         //FeingClient
-        ResponseEntity<ResultBotTelegramList> resultBotTelegramList = feingClient.buscaratualizacao();
-        return resultBotTelegramList.getBody();
+        feingClient.buscaratualizacao();
+        return resultBotTelegramList;
     }
 }

@@ -1,6 +1,9 @@
 package digitalinnovation.example.app.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import digitalinnovation.example.app.dto.MessageSend;
+import digitalinnovation.example.app.dto.ResultBotTelegram;
 import digitalinnovation.example.app.dto.ResultBotTelegramList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,7 +33,7 @@ public class JavaHttpClient {
         ResultBotTelegramList resultBotTelegramList = null;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_PATH + TOKEN + "/getUpdates"))
-                .GET()// this is the default
+                .GET()
                 .build();
 
         HttpResponse<String> stringHttpResponse = sendRequest(request);
@@ -43,15 +46,40 @@ public class JavaHttpClient {
         return resultBotTelegramList;
     }
 
+    public ResultBotTelegram enviarMensagem(MessageSend msg) {
+        ResultBotTelegram resultBotTelegram = null;
+
+        String mensagem = null;
+        try {
+            mensagem = objectMapper.writeValueAsString(msg);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_PATH + TOKEN + "/sendMessage"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(mensagem))
+                .build();
+
+        HttpResponse<String> stringHttpResponse = sendRequest(request);
+
+        try {
+            resultBotTelegram = objectMapper.readValue(stringHttpResponse.body(), ResultBotTelegram.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return resultBotTelegram;
+    }
+
     private HttpResponse<String> sendRequest(HttpRequest request) {
         HttpResponse<String> httpResponse = null;
-
         try {
             httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
         return httpResponse;
     }
 }
